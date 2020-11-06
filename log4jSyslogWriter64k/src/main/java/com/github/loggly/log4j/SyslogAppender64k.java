@@ -1,6 +1,7 @@
 package com.github.loggly.log4j;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
@@ -217,7 +218,7 @@ public class SyslogAppender64k extends AppenderSkeleton {
 	 * 
 	 * @since 1.2.15
 	 */
-	private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd HH:mm:ss ", Locale.ENGLISH);
+	private final SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
 	/**
 	 * Host name used to identify messages from this appender.
 	 * 
@@ -536,12 +537,41 @@ public class SyslogAppender64k extends AppenderSkeleton {
 	 */
 	private String getPacketHeader(final long timeStamp) {
 		if (header) {
-			final StringBuffer buf = new StringBuffer(dateFormat.format(new Date(timeStamp)));
-			//  RFC 3164 says leading space, not leading zero on days 1-9
-			if (buf.charAt(4) == '0') {
-				buf.setCharAt(4, ' ');
-			}
+			//Header consists of these fields
+			
+			//https://datatracker.ietf.org/doc/rfc5424/?include_text=1
+			//PRI VERSION TIMESTAMP HOSTNAME APP-NAME PROCID MSGID
+			//PRI+Version is somewhere else
+			//So we must set the rest
+			
+			final StringBuffer buf = new StringBuffer();
+			
+			//Version
+			buf.append("1");
+			buf.append(' ');
+			
+			//Timestamp
+			buf.append(dateFormat.format(new Date(timeStamp)));
+			buf.append(' ');
+
+			//Hostname
 			buf.append(getLocalHostname());
+			buf.append(' ');
+			
+			//AppName
+			buf.append(ManagementFactory.getRuntimeMXBean().getSystemProperties().get("sun.java.command").split(" ",2)[0]);
+			buf.append(' ');
+			
+			//Pid
+			buf.append(ManagementFactory.getRuntimeMXBean().getName().split("@",2)[0]);
+			buf.append(' ');
+			
+			//MSGID
+			buf.append(""+timeStamp);
+			buf.append(' ');
+			
+			//STructured data
+			buf.append("-");
 			buf.append(' ');
 			return buf.toString();
 		}

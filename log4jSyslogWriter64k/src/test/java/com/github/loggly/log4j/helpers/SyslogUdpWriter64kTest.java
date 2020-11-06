@@ -8,7 +8,7 @@ import org.junit.Test;
 public class SyslogUdpWriter64kTest {
 	@Test
 	public void createWriterWithPort() throws IOException {
-		Writer writer = new SyslogUdpWriter64k("localhost:5514");
+		Writer writer = new SyslogUdpWriter64k("rlog001.yak2.net:6514");
 		writer.write("abc");
 		writer.close();
 	}

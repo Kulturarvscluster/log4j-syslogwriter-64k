@@ -2,6 +2,7 @@ package com.github.loggly.log4j;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
@@ -218,7 +219,8 @@ public class SyslogAppender64k extends AppenderSkeleton {
 	 * 
 	 * @since 1.2.15
 	 */
-	private final SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
+	private final SimpleDateFormat rfc3164dateFormat = new SimpleDateFormat("MMM dd HH:mm:ss ", Locale.ENGLISH);
+	private final SimpleDateFormat rfc5424dateFormat = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
 	/**
 	 * Host name used to identify messages from this appender.
 	 * 
@@ -226,6 +228,16 @@ public class SyslogAppender64k extends AppenderSkeleton {
 	 */
 	private String localHostname;
 
+	private boolean rfc5424Format;
+	
+	public boolean isRfc5424Format() {
+		return rfc5424Format;
+	}
+	
+	public void setRfc5424Format(boolean rfc5424Format) {
+		this.rfc5424Format = rfc5424Format;
+	}
+	
 	/**
 	 * Set to true after the header of the layout has been sent or if it has none.
 	 */
@@ -537,43 +549,64 @@ public class SyslogAppender64k extends AppenderSkeleton {
 	 */
 	private String getPacketHeader(final long timeStamp) {
 		if (header) {
-			//Header consists of these fields
-			
-			//https://datatracker.ietf.org/doc/rfc5424/?include_text=1
-			//PRI VERSION TIMESTAMP HOSTNAME APP-NAME PROCID MSGID
-			//PRI+Version is somewhere else
-			//So we must set the rest
-			
 			final StringBuffer buf = new StringBuffer();
 			
-			//Version
-			buf.append("1");
-			buf.append(' ');
-			
-			//Timestamp
-			buf.append(dateFormat.format(new Date(timeStamp)));
-			buf.append(' ');
-
-			//Hostname
-			buf.append(getLocalHostname());
-			buf.append(' ');
-			
-			//AppName
-			buf.append(ManagementFactory.getRuntimeMXBean().getSystemProperties().get("sun.java.command").split(" ",2)[0]);
-			buf.append(' ');
-			
-			//Pid
-			buf.append(ManagementFactory.getRuntimeMXBean().getName().split("@",2)[0]);
-			buf.append(' ');
-			
-			//MSGID
-			buf.append(""+timeStamp);
-			buf.append(' ');
-			
-			//STructured data
-			buf.append("-");
-			buf.append(' ');
+			if (rfc5424Format) {
+				//Header consists of these fields
+				
+				//https://datatracker.ietf.org/doc/rfc5424/?include_text=1
+				//PRI VERSION TIMESTAMP HOSTNAME APP-NAME PROCID MSGID
+				//PRI is somewhere else
+				//So we must set the rest
+				
+				
+				//Version
+				buf.append("1");
+				buf.append(' ');
+				
+				//Timestamp
+				buf.append(rfc5424dateFormat.format(new Date(timeStamp)));
+				buf.append(' ');
+				
+				//Hostname
+				buf.append(getLocalHostname());
+				buf.append(' ');
+				
+				//AppName
+				RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+				buf.append(runtimeMXBean
+								   .getSystemProperties()
+								   .get("sun.java.command")
+								   .split(" ", 2)
+								   [0]);
+				buf.append(' ');
+				
+				//Pid
+				buf.append(runtimeMXBean
+								   .getName()
+								   .split("@", 2)
+								   [0]);
+				buf.append(' ');
+				
+				//MSGID
+				buf.append(timeStamp);
+				buf.append(' ');
+				
+				//Structured data
+				buf.append("-");
+				buf.append(' ');
+			} else {
+				buf.append(rfc3164dateFormat.format(new Date(timeStamp)));
+				//  RFC 3164 says leading space, not leading zero on days 1-9
+				if (buf.charAt(4) == '0') {
+					buf.setCharAt(4, ' ');
+				}
+				
+				buf.append(getLocalHostname());
+				buf.append(' ');
+			}
 			return buf.toString();
+			
 		}
 		return "";
 	}
@@ -608,7 +641,7 @@ public class SyslogAppender64k extends AppenderSkeleton {
 	}
 
 	/**
-	 * @param byteLen The max message length in bytes.
+	 * @param len The max message length in bytes.
 	 */
 	public void setMaxMessageLength(int len) {
 		if (len < LOWER_MAX_MSG_LENGTH || len > UPPER_MAX_MSG_LENGTH) {

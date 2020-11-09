@@ -20,13 +20,14 @@ class SyslogAppender64kTest {
         SyslogAppender64k appender = new SyslogAppender64k();
         
         PatternLayout layout = new PatternLayout();
-        layout.setConversionPattern("%d{ISO8601} - %-5p [%t:%C{1}@%L] - %m%n");
+        layout.setConversionPattern("%-5p [%t:%C{1}@%L] - %m%n");
         appender.setLayout(layout);
         
         appender.setSyslogHost("rlog001.yak2.net:6514");
         
         appender.setFacilityPrinting(false);
         appender.setHeader(true);
+        appender.setRfc5424Format(true);
         
         appender.append(new LoggingEvent(SyslogAppender64kTest.class.getName(), Logger.getRootLogger(), Level.INFO,"message",null));
     }

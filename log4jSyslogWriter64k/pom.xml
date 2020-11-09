@@ -16,6 +16,22 @@
 	<name>log4jSyslogWriter64k</name>
 	<description>Writes logs up to 64k in Syslog</description>
 
+	<distributionManagement>
+		<repository>
+			<id>sbforge-nexus</id>
+			<name>SBForge Nexus Repo manager</name>
+			<url>https://sbforge.org/nexus/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>sbforge-nexus</id>
+			<name>SBForge Nexus Repo manager</name>
+			<url>https://sbforge.org/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+		<!-- This needs to be overridden in projects with subproject, where the (sub)projects typically will be deployed to a
+              common site url based on the parent projects artifactId -->
+		<!-- <site> <id>sbforge-nexus</id> <name>SBForge Maven site</name> <url>${project.site.location}</url> </site> -->
+	</distributionManagement>
+
 	<properties>
 		<parent-pom.create-changelog-md>false</parent-pom.create-changelog-md>
 		<parent-pom.create-readme-md>false</parent-pom.create-readme-md>

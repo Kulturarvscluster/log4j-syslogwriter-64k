@@ -379,6 +379,14 @@ public class SyslogAppender64k extends AppenderSkeleton {
 	 */
 	@Override
 	public void activateOptions() {
+		
+		this.initSyslogFacilityStr();
+		
+		// If there is already a sqw, make it use the new facility.
+		if (syslogQuietWriter != null) {
+			syslogQuietWriter.setSyslogFacility(this.syslogFacility);
+		}
+		
 		if (header) {
 			getLocalHostname();
 		}
@@ -386,6 +394,7 @@ public class SyslogAppender64k extends AppenderSkeleton {
 			sendLayoutMessage(layout.getHeader());
 		}
 		layoutHeaderChecked = true;
+		createSyslogWriter();
 	}
 
 	/**
@@ -406,7 +415,7 @@ public class SyslogAppender64k extends AppenderSkeleton {
 	 */
 	public void setSyslogHost(final String syslogHost) {
 		this.syslogHost = syslogHost;
-		createSyslogWriter();
+		//createSyslogWriter();
 	}
 
 	private void createSyslogWriter() {
@@ -459,7 +468,7 @@ public class SyslogAppender64k extends AppenderSkeleton {
 			default:
 				throw new RuntimeException(String.format("Invalid protocol: %s", protocolToSet));
 		}
-		createSyslogWriter();
+		//createSyslogWriter();
 	}
 
 	/**
@@ -482,12 +491,6 @@ public class SyslogAppender64k extends AppenderSkeleton {
 			syslogFacility = LOG_USER;
 		}
 
-		this.initSyslogFacilityStr();
-
-		// If there is already a sqw, make it use the new facility.
-		if (syslogQuietWriter != null) {
-			syslogQuietWriter.setSyslogFacility(this.syslogFacility);
-		}
 	}
 
 	/**

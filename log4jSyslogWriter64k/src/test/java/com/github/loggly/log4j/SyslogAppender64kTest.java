@@ -32,6 +32,7 @@ class SyslogAppender64kTest {
         appender.setRfc5424Format(true);
         appender.setProtocol("tcp");
         
+        appender.activateOptions();
         appender.append(new LoggingEvent(SyslogAppender64kTest.class.getName(), Logger.getRootLogger(), Level.INFO,"message",null));
     }
 }

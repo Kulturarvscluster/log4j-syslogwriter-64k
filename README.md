@@ -9,6 +9,8 @@ log4j.appender.SYSLOG.FacilityPrinting=false
 log4j.appender.SYSLOG.Header=true
 log4j.appender.SYSLOG.Rfc5424Format=true
 log4j.appender.SYSLOG.SyslogHost={{syslog_server}}:{{syslog_server_port}}
+log4j.appender.SYSLOG.Protocol=tcp
+log4k.appender.SYSLOG.AppName=MyApp
 log4j.appender.SYSLOG.layout=org.apache.log4j.PatternLayout
 log4j.appender.SYSLOG.layout.ConversionPattern=%-5p [%t:%C{1}@%L] - %m%n
 # https://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html
@@ -19,13 +21,15 @@ These properties control the format of the output
 log4j.appender.SYSLOG.FacilityPrinting=false
 log4j.appender.SYSLOG.Header=true
 log4j.appender.SYSLOG.Rfc5424Format=true
+log4k.appender.SYSLOG.AppName=MyApp
+
 ```
 If `log4j.appender.SYSLOG.Rfc5424Format=false`, the messages will be output as rfc3164
 
 When using Rfc5424Format, the header fields will be used as
 
 * HOSTNAME: local hostname
-* APP-NAME: Main class, determined as 
+* APP-NAME: If not set, will be Main class, determined as 
     ```java
    ManagementFactory.getRuntimeMXBean()
                        .getSystemProperties()

@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.Priority;
 import org.apache.log4j.spi.LoggingEvent;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SyslogAppender64kTest {
     
     @Test
+    @Ignore
     void append() {
         SyslogAppender64k appender = new SyslogAppender64k();
         
@@ -23,11 +25,12 @@ class SyslogAppender64kTest {
         layout.setConversionPattern("%-5p [%t:%C{1}@%L] - %m%n");
         appender.setLayout(layout);
         
-        appender.setSyslogHost("rlog001.yak2.net:6514");
+        appender.setSyslogHost("proj001.yak2.net:10514");
         
         appender.setFacilityPrinting(false);
         appender.setHeader(true);
         appender.setRfc5424Format(true);
+        appender.setProtocol("tcp");
         
         appender.append(new LoggingEvent(SyslogAppender64kTest.class.getName(), Logger.getRootLogger(), Level.INFO,"message",null));
     }

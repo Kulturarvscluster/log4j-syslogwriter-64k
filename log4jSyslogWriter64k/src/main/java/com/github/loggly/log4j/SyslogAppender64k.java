@@ -202,6 +202,8 @@ public class SyslogAppender64k extends AppenderSkeleton {
 	private String syslogHost;
 	private String protocol = "udp";
 
+	private String appName = null;
+	
 	/**
 	 * Max length in bytes of a message.
 	 */
@@ -426,7 +428,16 @@ public class SyslogAppender64k extends AppenderSkeleton {
 				throw new RuntimeException(String.format("Invalid protocol: %s", protocol));
 		}
 	}
-
+	
+	
+	public String getAppName() {
+		return appName;
+	}
+	
+	public void setAppName(String appName) {
+		this.appName = appName;
+	}
+	
 	/**
 	 * Returns the value of the <b>SyslogHost</b> option.
 	 */
@@ -572,13 +583,18 @@ public class SyslogAppender64k extends AppenderSkeleton {
 				buf.append(getLocalHostname());
 				buf.append(' ');
 				
-				//AppName
 				RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-				buf.append(runtimeMXBean
-								   .getSystemProperties()
-								   .get("sun.java.command")
-								   .split(" ", 2)
-								   [0]);
+				
+				//AppName
+				if (appName != null){
+					buf.append(appName);
+				} else {
+					buf.append(runtimeMXBean
+									   .getSystemProperties()
+									   .get("sun.java.command")
+									   .split(" ", 2)
+									   [0]);
+				}
 				buf.append(' ');
 				
 				//Pid
